@@ -1,0 +1,13 @@
+version: "3"
+services:
+  spring-app:
+    build: ./
+    ports:
+      - "8080:8080"
+    links:
+      -   "redis:redis"
+  redis:
+    image: "redis:alpine"
+    hostname: redis
+    ports:
+      - "6379:6379"
