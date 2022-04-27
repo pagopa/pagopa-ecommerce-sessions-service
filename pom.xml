@@ -14,7 +14,7 @@
 	<name>sessionsservice</name>
 	<description>pagoPA Session-service micro-service</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>18</java.version>
 		<kotlin.version>1.6.21</kotlin.version>
 	</properties>
 	<dependencies>
