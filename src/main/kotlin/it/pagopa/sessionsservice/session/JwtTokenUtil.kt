@@ -14,11 +14,11 @@ import javax.crypto.SecretKey
 
 
 @Component
-class JwtTokenUtil(
+class JwtTokenUtil{
     // Base64-encoded secret key
-    @Value("jwt.secret")
-    private val jwtSecret: String,
-) {
+    @Value("\${jwt.secret}")
+    private val jwtSecret: String? = null
+
     val logger = LoggerFactory.getLogger(javaClass)
 
     private fun getKey(): SecretKey {
