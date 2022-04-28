@@ -1,11 +1,10 @@
 package it.pagopa.sessionsservice.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import it.pagopa.sessionsservice.session.SessionRequest
+import it.pagopa.sessionsservice.domain.SessionData
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
@@ -18,11 +17,11 @@ class SessionsControllerTests {
 
     @Test
     fun postSessionTest() {
-        val sessionRequest = SessionRequest("token", "jhon.doe@mail.it")
+        val sessionData = SessionData("token", "jhon.doe@mail.it")
 
         mockMvc.post("/session") {
             contentType = MediaType.APPLICATION_JSON
-            content = mapper.writeValueAsString(sessionRequest)
+            content = mapper.writeValueAsString(sessionData)
             accept = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isOk() }
