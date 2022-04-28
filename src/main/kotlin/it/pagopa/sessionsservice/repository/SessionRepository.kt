@@ -1,9 +1,8 @@
 package it.pagopa.sessionsservice.repository
 
 import it.pagopa.sessionsservice.domain.SessionData
+import org.springframework.data.repository.CrudRepository
+import org.springframework.stereotype.Repository
 
-interface TokenRepository {
-    fun getTokenFromSessionData(sessionData: SessionData)
-    fun addSession(token: String, sessionData: SessionData)
-    
-}
+@Repository
+interface SessionRepository: CrudRepository<SessionData, String>

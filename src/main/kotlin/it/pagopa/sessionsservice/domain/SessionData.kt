@@ -1,3 +1,6 @@
 package it.pagopa.sessionsservice.domain
 
-data class SessionRequest(val paymentToken: String, val email: String)
+import org.springframework.data.redis.core.RedisHash
+
+@RedisHash("SessionData")
+data class SessionData(val rptId: String, val email: String)

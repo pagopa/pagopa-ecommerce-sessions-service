@@ -1,6 +1,6 @@
 package it.pagopa.sessionsservice.controllers
 
-import it.pagopa.sessionsservice.session.SessionRequest
+import it.pagopa.sessionsservice.domain.SessionData
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController
 class SessionController{
 
   @PostMapping("/session")
-  fun postSession(@RequestBody sessionRequest: SessionRequest): Any{
-    return sessionRequest;
+  fun postSession(@RequestBody sessionData: SessionData): Any{
+    return sessionData;
   }
 
 }
