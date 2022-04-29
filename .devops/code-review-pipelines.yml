@@ -35,7 +35,7 @@ steps:
       mavenPomFile: 'pom.xml'
       mavenOptions: '-Xmx3072m $(MAVEN_OPTS)'
       javaHomeOption: 'JDKVersion'
-      jdkVersionOption: '11'
+      jdkVersionOption: '17'
       jdkArchitectureOption: 'x64'
       publishJUnitResults: false
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
