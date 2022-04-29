@@ -1,6 +1,7 @@
 package it.pagopa.sessionsservice.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import it.pagopa.sessionsservice.domain.RptId
 import it.pagopa.sessionsservice.domain.SessionData
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +18,7 @@ class SessionsControllerTests {
 
     @Test
     fun postSessionTest() {
-        val sessionData = SessionData("id","token", "jhondoe@mail.it")
+        val sessionData = SessionData(RptId("77777777777302016723749670035"), "jhondoe@mail.it", null)
 
         mockMvc.post("/session") {
             contentType = MediaType.APPLICATION_JSON
@@ -25,7 +26,17 @@ class SessionsControllerTests {
             accept = MediaType.APPLICATION_JSON
         }.andExpect {
             status { isOk() }
-           // content { contentType(MediaType.APPLICATION_JSON) }
+           content { contentType(MediaType.APPLICATION_JSON) }
+        }
+    }
+
+    @Test
+    fun postSessionBadRequest() {
+        mockMvc.post("/session") {
+            contentType = MediaType.APPLICATION_JSON
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isBadRequest() }
         }
     }
 }
