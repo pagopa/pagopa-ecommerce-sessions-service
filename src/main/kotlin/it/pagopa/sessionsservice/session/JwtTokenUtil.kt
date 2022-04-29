@@ -10,6 +10,7 @@ import it.pagopa.sessionsservice.domain.SessionData
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.security.SecureRandom
 import javax.crypto.SecretKey
 
 
@@ -32,6 +33,7 @@ class JwtTokenUtil{
                 .builder()
                 .claim("rptId", sessionData.rptId)
                 .claim("email", sessionData.email)
+                .claim("jti", generateNonce())
                 .signWith(getKey(), SignatureAlgorithm.HS512)
                 .compact()
         } catch (jExc: JwtException){
@@ -43,7 +45,7 @@ class JwtTokenUtil{
     // Generate token
     fun validateToken(token: String): Boolean {
         try {
-            val tokenBody = Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJwt(token).body
+            val tokenBody = Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).body
             return true
         } catch (signExc: SignatureException){
             logger.info("Error during JWS signature validation\n${signExc.message}")
@@ -52,5 +54,14 @@ class JwtTokenUtil{
             logger.error("Unexpected error during token validation\n${exc.message}")
             return false
         }
+    }
+
+    fun generateNonce(): String? {
+        val secureRandom = SecureRandom()
+        val stringBuilder = StringBuilder()
+        for (i in 0..14) {
+            stringBuilder.append(secureRandom.nextInt(10))
+        }
+        return stringBuilder.toString()
     }
 }
