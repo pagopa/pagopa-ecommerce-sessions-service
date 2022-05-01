@@ -1,0 +1,63 @@
+
+openapi: 3.0.1
+info:
+  title: ecommerce pagoPA
+  description: "RESTful APIs to provide sessions for ecommerce pagoPA"
+  version: '0.0.0'
+paths:
+  /sessions:
+    post:
+      summary: API to create new token
+      operationId: postToken
+      requestBody:
+        description: Session Data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionData'
+      responses:
+        '200':
+          description: Success
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionToken'
+        '500':
+          description: Internal Server Error
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+components:
+  schemas:
+    SessionData:
+      required:
+        - rptId
+        - email
+        - paymentToken
+      type: object
+      properties:
+        rptId:
+          type: string
+        email:
+          type: string
+        paymentToken:
+          type: string
+    SessionToken:
+      required:
+        - token
+      type: object
+      properties:
+        token:
+          type: string
