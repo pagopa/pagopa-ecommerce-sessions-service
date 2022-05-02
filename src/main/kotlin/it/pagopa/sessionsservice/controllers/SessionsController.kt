@@ -1,12 +1,15 @@
 package it.pagopa.sessionsservice.controllers
 
+import it.pagopa.sessionsservice.domain.RptId
 import it.pagopa.sessionsservice.domain.SessionData
 import it.pagopa.sessionsservice.repository.SessionRepository
 import it.pagopa.sessionsservice.session.JwtTokenUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 class SessionController(){
@@ -24,8 +27,22 @@ class SessionController(){
   }
 
   @GetMapping("/session")
-  fun getSessions(): ResponseEntity<List<SessionData>>{
-    return ResponseEntity.ok(sessionRepository?.findAll()?.toList())
+  fun getSessions(@RequestParam(required = false) rptId: String?): ResponseEntity<Any> {
+    if (rptId == null) {
+      return ResponseEntity.ok(sessionRepository?.findAll()?.toList())
+    } else {
+      return try {
+        val rptIdObj = RptId(rptId)
+
+        val sessionData = sessionRepository?.findById(rptIdObj)?.get()
+
+        return ResponseEntity.ok(sessionData)
+      } catch (nxElement: NoSuchElementException){
+        throw ResponseStatusException(
+          HttpStatus.NOT_FOUND, "Cannot found session data bound to this rptId"
+        )
+      }
+    }
   }
 
   @PostMapping("/session/validate")
