@@ -2,6 +2,7 @@ package it.pagopa.sessionsservice.controllers
 
 import it.pagopa.sessionsservice.domain.RptId
 import it.pagopa.sessionsservice.domain.SessionData
+import it.pagopa.sessionsservice.domain.SessionRequest
 import it.pagopa.sessionsservice.repository.SessionRepository
 import it.pagopa.sessionsservice.session.JwtTokenUtil
 import org.slf4j.LoggerFactory
@@ -19,11 +20,18 @@ class SessionController(){
   val logger = LoggerFactory.getLogger(javaClass)
 
   @PostMapping("/session")
-  fun postSession(@RequestBody sessionData: SessionData): ResponseEntity<SessionData>{
-    sessionData.token = jwtTokenUtil?.generateToken(sessionData)
-    sessionRepository?.save(sessionData)
-
-    return ResponseEntity.ok(sessionData)
+  fun postSession(@RequestBody sessionRequest: SessionRequest): ResponseEntity<SessionData>{
+    var sessionData: SessionData? =
+      sessionRequest.paymentToken?.let {
+        SessionData(sessionRequest.rptId, sessionRequest.email,
+          it, jwtTokenUtil?.generateToken(sessionRequest))
+      }
+    return if (sessionData != null){
+      sessionRepository?.save(sessionData)
+      ResponseEntity.ok(sessionData)
+    } else {
+      ResponseEntity.badRequest().body(null)
+    }
   }
 
   @GetMapping("/session")
