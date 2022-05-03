@@ -59,7 +59,7 @@ class SessionController(){
     val storedSessionData: SessionData = sessionRepository?.findById(sessionData.rptId)?.get()
       ?: return ResponseEntity.badRequest().body("")
 
-    return if (storedSessionData.token == sessionData.token && sessionData.token?.let { jwtTokenUtil?.validateToken(it) } == true){
+    return if (storedSessionData.sessionToken == sessionData.sessionToken && sessionData.sessionToken?.let { jwtTokenUtil?.validateToken(it) } == true){
       ResponseEntity.ok("")
     } else {
       ResponseEntity.badRequest().body("")
