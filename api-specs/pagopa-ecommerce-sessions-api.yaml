@@ -1,0 +1,145 @@
+
+openapi: 3.0.1
+info:
+  title: ecommerce pagoPA
+  description: "RESTful APIs to provide sessions for ecommerce pagoPA"
+  version: '0.0.0'
+paths:
+  /sessions:
+    post:
+      summary: API to create new token
+      operationId: postToken
+      requestBody:
+        description: Session Data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionData'
+      responses:
+        '200':
+          description: Success
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionToken'
+        '500':
+          description: Internal Server Error
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+    get:
+      summary: API to retrieve all session tokens
+      operationId: getAllTokens
+      responses:
+        '200':
+          description: Success
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: '#/components/schemas/SessionData'
+        '500':
+          description: Internal Server Error
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+
+  /sessions/{rptId}:
+    get:
+      parameters:
+        - in: path
+          name: rptId   # Note the name is the same as in the path
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The rptId of the transaction
+      summary: API retrieve the session token bound to an rptId
+      operationId: getToken
+      responses:
+        '200':
+          description: Success
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionData'
+        '500':
+          description: Internal Server Error
+          headers:
+            Request-Id:
+              schema:
+                type: string
+                minLength: 16
+                maxLength: 16
+              required: true
+
+components:
+  schemas:
+    SessionRequest:
+      required:
+        - rptId
+        - email
+        - paymentToken
+      type: object
+      properties:
+        rptId:
+          type: string
+        email:
+          type: string
+        paymentToken:
+          type: string
+    SessionData:
+      required:
+        - rptId
+        - email
+        - paymentToken
+        - sessionToken
+      type: object
+      properties:
+        rptId:
+          type: string
+        email:
+          type: string
+        paymentToken:
+          type: string
+        sessionToken:
+          $ref: '#/components/schemas/SessionToken'
+    SessionToken:
+      required:
+        - token
+      type: object
+      properties:
+        token:
+          type: string
