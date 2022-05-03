@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>it.pagopa</groupId>
-	<artifactId>sessionsservice</artifactId>
+	<artifactId>pagopa-ecommerce-sessions-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>sessionsservice</name>
+	<name>pagopa-ecommerce-sessions-service</name>
 	<description>pagoPA Session-service micro-service</description>
 	<properties>
 		<java.version>17</java.version>
