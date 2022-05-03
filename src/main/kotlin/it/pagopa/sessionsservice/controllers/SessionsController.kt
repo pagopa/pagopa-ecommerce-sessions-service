@@ -28,20 +28,21 @@ class SessionController(){
 
   @GetMapping("/session")
   fun getSessions(@RequestParam(required = false) rptId: String?): ResponseEntity<Any> {
-    if (rptId == null) {
-      return ResponseEntity.ok(sessionRepository?.findAll()?.toList())
-    } else {
-      return try {
-        val rptIdObj = RptId(rptId)
+    return ResponseEntity.ok(sessionRepository?.findAll()?.toList())
+  }
 
-        val sessionData = sessionRepository?.findById(rptIdObj)?.get()
+  @GetMapping("/session/{rptId}")
+  fun getSession(@PathVariable rptId: String): ResponseEntity<Any>{
+    return try {
+      val rptIdObj = RptId(rptId)
 
-        return ResponseEntity.ok(sessionData)
-      } catch (nxElement: NoSuchElementException){
-        throw ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Cannot found session data bound to this rptId"
-        )
-      }
+      val sessionData = sessionRepository?.findById(rptIdObj)?.get()
+
+      return ResponseEntity.ok(sessionData)
+    } catch (nxElement: NoSuchElementException){
+      throw ResponseStatusException(
+        HttpStatus.NOT_FOUND, "Cannot found session data bound to this rptId"
+      )
     }
   }
 
