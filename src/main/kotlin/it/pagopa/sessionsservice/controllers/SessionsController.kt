@@ -2,6 +2,7 @@ package it.pagopa.sessionsservice.controllers
 
 import it.pagopa.sessionsservice.domain.RptId
 import it.pagopa.sessionsservice.domain.SessionData
+import it.pagopa.sessionsservice.domain.SessionRequest
 import it.pagopa.sessionsservice.repository.SessionRepository
 import it.pagopa.sessionsservice.session.JwtTokenUtil
 import org.slf4j.LoggerFactory
@@ -19,29 +20,37 @@ class SessionController(){
   val logger = LoggerFactory.getLogger(javaClass)
 
   @PostMapping("/session")
-  fun postSession(@RequestBody sessionData: SessionData): ResponseEntity<SessionData>{
-    sessionData.token = jwtTokenUtil?.generateToken(sessionData)
-    sessionRepository?.save(sessionData)
-
-    return ResponseEntity.ok(sessionData)
+  fun postSession(@RequestBody sessionRequest: SessionRequest): ResponseEntity<SessionData>{
+    var sessionData: SessionData? =
+      sessionRequest.paymentToken?.let {
+        SessionData(sessionRequest.rptId, sessionRequest.email,
+          it, jwtTokenUtil?.generateToken(sessionRequest))
+      }
+    return if (sessionData != null){
+      sessionRepository?.save(sessionData)
+      ResponseEntity.ok(sessionData)
+    } else {
+      ResponseEntity.badRequest().body(null)
+    }
   }
 
   @GetMapping("/session")
   fun getSessions(@RequestParam(required = false) rptId: String?): ResponseEntity<Any> {
-    if (rptId == null) {
-      return ResponseEntity.ok(sessionRepository?.findAll()?.toList())
-    } else {
-      return try {
-        val rptIdObj = RptId(rptId)
+    return ResponseEntity.ok(sessionRepository?.findAll()?.toList())
+  }
 
-        val sessionData = sessionRepository?.findById(rptIdObj)?.get()
+  @GetMapping("/session/{rptId}")
+  fun getSession(@PathVariable rptId: String): ResponseEntity<Any>{
+    return try {
+      val rptIdObj = RptId(rptId)
 
-        return ResponseEntity.ok(sessionData)
-      } catch (nxElement: NoSuchElementException){
-        throw ResponseStatusException(
-          HttpStatus.NOT_FOUND, "Cannot found session data bound to this rptId"
-        )
-      }
+      val sessionData = sessionRepository?.findById(rptIdObj)?.get()
+
+      return ResponseEntity.ok(sessionData)
+    } catch (nxElement: NoSuchElementException){
+      throw ResponseStatusException(
+        HttpStatus.NOT_FOUND, "Cannot found session data bound to this rptId"
+      )
     }
   }
 
@@ -50,7 +59,7 @@ class SessionController(){
     val storedSessionData: SessionData = sessionRepository?.findById(sessionData.rptId)?.get()
       ?: return ResponseEntity.badRequest().body("")
 
-    return if (storedSessionData.token == sessionData.token && sessionData.token?.let { jwtTokenUtil?.validateToken(it) } == true){
+    return if (storedSessionData.sessionToken == sessionData.sessionToken && sessionData.sessionToken?.let { jwtTokenUtil?.validateToken(it) } == true){
       ResponseEntity.ok("")
     } else {
       ResponseEntity.badRequest().body("")
