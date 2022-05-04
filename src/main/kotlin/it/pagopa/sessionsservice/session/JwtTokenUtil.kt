@@ -6,7 +6,6 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
-import it.pagopa.sessionsservice.domain.SessionData
 import it.pagopa.sessionsservice.domain.SessionRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
