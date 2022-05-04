@@ -5,7 +5,7 @@ info:
   description: "RESTful APIs to provide sessions for ecommerce pagoPA"
   version: '0.0.0'
 paths:
-  /sessions:
+  /session:
     post:
       summary: API to create new token
       operationId: postToken
@@ -19,39 +19,18 @@ paths:
       responses:
         '200':
           description: Success
-          headers:
-            Request-Id:
-              schema:
-                type: string
-                minLength: 16
-                maxLength: 16
-              required: true
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionToken'
         '500':
           description: Internal Server Error
-          headers:
-            Request-Id:
-              schema:
-                type: string
-                minLength: 16
-                maxLength: 16
-              required: true
     get:
       summary: API to retrieve all session tokens
       operationId: getAllTokens
       responses:
         '200':
           description: Success
-          headers:
-            Request-Id:
-              schema:
-                type: string
-                minLength: 16
-                maxLength: 16
-              required: true
           content:
             application/json:
               schema:
@@ -61,15 +40,8 @@ paths:
                   $ref: '#/components/schemas/SessionData'
         '500':
           description: Internal Server Error
-          headers:
-            Request-Id:
-              schema:
-                type: string
-                minLength: 16
-                maxLength: 16
-              required: true
 
-  /sessions/{rptId}:
+  /session/{rptId}:
     get:
       parameters:
         - in: path
@@ -84,26 +56,12 @@ paths:
       responses:
         '200':
           description: Success
-          headers:
-            Request-Id:
-              schema:
-                type: string
-                minLength: 16
-                maxLength: 16
-              required: true
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionData'
         '500':
           description: Internal Server Error
-          headers:
-            Request-Id:
-              schema:
-                type: string
-                minLength: 16
-                maxLength: 16
-              required: true
 
 components:
   schemas:
@@ -135,11 +93,17 @@ components:
         paymentToken:
           type: string
         sessionToken:
-          $ref: '#/components/schemas/SessionToken'
+          type: string
     SessionToken:
       required:
         - token
       type: object
       properties:
-        token:
+        rptId:
+          type: string
+        email:
+          type: string
+        paymentToken:
+          type: string
+        sessionToken:
           type: string
