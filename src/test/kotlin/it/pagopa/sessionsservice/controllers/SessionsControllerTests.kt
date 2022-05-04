@@ -2,7 +2,6 @@ package it.pagopa.sessionsservice.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import it.pagopa.sessionsservice.domain.RptId
-import it.pagopa.sessionsservice.domain.SessionData
 import it.pagopa.sessionsservice.domain.SessionRequest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
