@@ -18,7 +18,7 @@ class SessionsControllerTests {
 
     @Test
     fun postSessionTest() {
-        val sessionRequest = SessionRequest(RptId("77777777777302016723749670035"), "jhondoe@mail.it", "token")
+        val sessionRequest = SessionRequest("77777777777302016723749670035", "jhondoe@mail.it", "token")
 
 
         mockMvc.post("/sessions") {

@@ -3,6 +3,7 @@ package it.pagopa.sessionsservice.controllers
 import it.pagopa.sessionsservice.domain.RptId
 import it.pagopa.sessionsservice.domain.SessionData
 import it.pagopa.sessionsservice.domain.SessionRequest
+import it.pagopa.sessionsservice.domain.SessionResponse
 import it.pagopa.sessionsservice.repository.SessionRepository
 import it.pagopa.sessionsservice.session.JwtTokenUtil
 import org.slf4j.LoggerFactory
@@ -20,15 +21,15 @@ class SessionController(){
   val logger = LoggerFactory.getLogger(javaClass)
 
   @PostMapping("/sessions")
-  fun postSession(@RequestBody sessionRequest: SessionRequest): ResponseEntity<SessionData>{
+  fun postSession(@RequestBody sessionRequest: SessionRequest): ResponseEntity<SessionResponse>{
     var sessionData: SessionData? =
       sessionRequest.paymentToken?.let {
-        SessionData(sessionRequest.rptId, sessionRequest.email,
+        SessionData(RptId(sessionRequest.rptId), sessionRequest.email,
           it, jwtTokenUtil?.generateToken(sessionRequest))
       }
     return if (sessionData != null){
       sessionRepository?.save(sessionData)
-      ResponseEntity.ok(sessionData)
+      ResponseEntity.ok(sessionData.toResponse())
     } else {
       ResponseEntity.badRequest().body(null)
     }
@@ -36,7 +37,7 @@ class SessionController(){
 
   @GetMapping("/session")
   fun getSessions(@RequestParam(required = false) rptId: String?): ResponseEntity<Any> {
-    return ResponseEntity.ok(sessionRepository?.findAll()?.toList())
+    return ResponseEntity.ok(sessionRepository?.findAll()?.toList()?.map { sessionData -> sessionData.toResponse()  })
   }
 
   @GetMapping("/session/{rptId}")
@@ -44,7 +45,7 @@ class SessionController(){
     return try {
       val rptIdObj = RptId(rptId)
 
-      val sessionData = sessionRepository?.findById(rptIdObj)?.get()
+      val sessionData = sessionRepository?.findById(rptIdObj)?.get()?.toResponse()
 
       return ResponseEntity.ok(sessionData)
     } catch (nxElement: NoSuchElementException){

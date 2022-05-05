@@ -8,5 +8,9 @@ data class SessionData(@Id var rptId: RptId, var email: String, var paymentToken
     init {
         require(EmailValidator.validateEmail(email)) { "Email must be RFC 5322 compliant." }
     }
+
+    fun toResponse(): SessionResponse {
+        return SessionResponse(rptId.rptId, email, paymentToken, sessionToken)
+    }
 }
 
