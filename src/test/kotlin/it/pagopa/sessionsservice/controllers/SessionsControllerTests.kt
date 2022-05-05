@@ -21,7 +21,7 @@ class SessionsControllerTests {
         val sessionRequest = SessionRequest(RptId("77777777777302016723749670035"), "jhondoe@mail.it", "token")
 
 
-        mockMvc.post("/session") {
+        mockMvc.post("/sessions") {
             contentType = MediaType.APPLICATION_JSON
             content = mapper.writeValueAsString(sessionRequest)
             accept = MediaType.APPLICATION_JSON
