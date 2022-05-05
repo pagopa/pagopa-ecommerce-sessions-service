@@ -19,7 +19,7 @@ class SessionController(){
 
   val logger = LoggerFactory.getLogger(javaClass)
 
-  @PostMapping("/session")
+  @PostMapping("/sessions")
   fun postSession(@RequestBody sessionRequest: SessionRequest): ResponseEntity<SessionData>{
     var sessionData: SessionData? =
       sessionRequest.paymentToken?.let {

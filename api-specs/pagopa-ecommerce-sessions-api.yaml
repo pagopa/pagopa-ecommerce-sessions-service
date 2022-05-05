@@ -5,7 +5,7 @@ info:
   description: "RESTful APIs to provide sessions for ecommerce pagoPA"
   version: '0.0.0'
 paths:
-  /session:
+  /sessions:
     post:
       summary: API to create new token
       operationId: postToken
@@ -15,14 +15,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionData'
+              $ref: '#/components/schemas/SessionRequest'
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionToken'
+                $ref: '#/components/schemas/SessionData'
         '500':
           description: Internal Server Error
     get:
