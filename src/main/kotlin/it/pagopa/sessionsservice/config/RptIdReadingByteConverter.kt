@@ -12,6 +12,6 @@ import java.nio.charset.StandardCharsets
 @ReadingConverter
 class RptIdReadingByteConverter : Converter<ByteArray?, RptId?> {
     override fun convert(source: ByteArray): RptId? {
-        return RptId(String(source!!, StandardCharsets.UTF_8))
+        return RptId(String(source, StandardCharsets.UTF_8))
     }
 }

@@ -1,9 +1,29 @@
-FROM openjdk:17-jdk-alpine
+FROM openjdk:17-slim as build
+WORKDIR /workspace/app
 
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+RUN ./mvnw dependency:copy-dependencies
+# RUN ./mvnw dependency:go-offline
 
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+COPY src src
+COPY api-spec api-spec
+RUN ./mvnw install -DskipTests # --offline
+RUN mkdir target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
 
-ENTRYPOINT ["java","-jar","/app.jar"]
+FROM openjdk:17-slim
+
+RUN addgroup --system user && adduser --ingroup user --system user
+USER user:user
+
+WORKDIR /app/
+
+ARG EXTRACTED=/workspace/app/target/extracted
+
+COPY --from=build --chown=user ${EXTRACTED}/dependencies/ ./
+COPY --from=build --chown=user ${EXTRACTED}/spring-boot-loader/ ./
+COPY --from=build --chown=user ${EXTRACTED}/snapshot-dependencies/ ./
+COPY --from=build --chown=user ${EXTRACTED}/application/ ./
+
+ENTRYPOINT ["java","org.springframework.boot.loader.JarLauncher"]

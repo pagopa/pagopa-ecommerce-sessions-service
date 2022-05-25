@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component
 class RptIdReadingStringConverter :
     Converter<String?, RptId> {
     override fun convert(source: String): RptId? {
-        return RptId(source!!)
+        return RptId(source)
     }
 }

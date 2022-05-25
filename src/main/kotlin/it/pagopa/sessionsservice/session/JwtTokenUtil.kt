@@ -43,7 +43,7 @@ class JwtTokenUtil{
         }
     }
 
-    // Generate token
+    // Validate signed token
     fun validateToken(token: String): Boolean {
         try {
             val tokenBody = Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).body
