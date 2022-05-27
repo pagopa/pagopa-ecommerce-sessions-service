@@ -1,6 +1,6 @@
-FROM openjdk:17-jdk-alpine
+FROM openjdk:17-jdk-slim
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN addgroup --system spring && adduser --ingroup spring --system spring
 USER spring:spring
 
 ARG JAR_FILE=target/*.jar
