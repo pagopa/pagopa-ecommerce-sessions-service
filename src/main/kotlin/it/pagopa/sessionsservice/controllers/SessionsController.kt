@@ -6,8 +6,10 @@ import it.pagopa.generated.session.server.model.SessionDataDto
 import it.pagopa.generated.session.server.model.SessionRequestDto
 import it.pagopa.sessionsservice.service.SessionsService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -17,16 +19,37 @@ class SessionsController: SessionApi, SessionsApi {
     @Autowired lateinit var sessionsService: SessionsService
 
     override fun getToken(rptId: String?, exchange: ServerWebExchange?): Mono<ResponseEntity<SessionDataDto>> {
-        // TODO("Not yet implemented")
-        return Mono.empty()
+        if (rptId.isNullOrEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+
+        return sessionsService.getToken(rptId).map { sessionData ->
+            return@map if(sessionData != null) {
+                ResponseEntity.ok(
+                    SessionDataDto()
+                        .rptId(sessionData.rptId)
+                        .paymentToken(sessionData.paymentToken)
+                        .sessionToken(sessionData.sessionToken)
+                        .email(sessionData.email)
+                )
+            } else {
+                throw ResponseStatusException(HttpStatus.NOT_FOUND)
+            }}
     }
 
     override fun validateSession(
         sessionDataDto: Mono<SessionDataDto>?,
         exchange: ServerWebExchange?
     ): Mono<ResponseEntity<Void>> {
-        // TODO("Not yet implemented")
-        return Mono.empty()
+       return sessionDataDto?.flatMap { sessionData ->
+           return@flatMap sessionsService.validateSession(sessionData)
+               .map{ isValid ->
+                   if(!isValid){
+                       throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+                   } else {
+                       return@map ResponseEntity.ok().build()
+                   }
+               }
+       }
+           ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST)
     }
 
     override fun getAllTokens(exchange: ServerWebExchange?): Mono<ResponseEntity<Flux<SessionDataDto>>> {
@@ -43,7 +66,17 @@ class SessionsController: SessionApi, SessionsApi {
             .sessionToken("")
             .rptId(it.rptId)
             .email(it.email)) }
-            .map { ResponseEntity.ok(SessionDataDto()) }
+            .map{
+                if(it != null){
+                    return@map ResponseEntity.ok(SessionDataDto()
+                        .paymentToken(it.paymentToken)
+                        .sessionToken(it.sessionToken)
+                        .rptId(it.rptId)
+                        .email(it.email))
+                } else {
+                    throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+                }
+            }
 
     }
 }
