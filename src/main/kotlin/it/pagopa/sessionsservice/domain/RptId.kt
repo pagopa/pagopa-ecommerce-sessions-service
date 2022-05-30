@@ -8,6 +8,10 @@ class RptId(rptId: String) {
 
     companion object {
         private val rptIdRegex = Pattern.compile("([a-zA-Z\\d]{1,35})|(RF\\d{2}[a-zA-Z\\d]{1,21})")
+
+        fun validate(rptId: String): Boolean{
+            return rptId matches rptIdRegex.toRegex()
+        }
     }
 
     init {

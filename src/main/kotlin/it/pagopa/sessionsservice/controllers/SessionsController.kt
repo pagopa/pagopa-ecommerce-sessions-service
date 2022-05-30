@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono
 @RestController
 class SessionsController: SessionApi, SessionsApi {
     @Autowired lateinit var sessionsService: SessionsService
-    @Autowired
+
     override fun getToken(rptId: String?, exchange: ServerWebExchange?): Mono<ResponseEntity<SessionDataDto>> {
         // TODO("Not yet implemented")
         return Mono.empty()
@@ -37,7 +37,13 @@ class SessionsController: SessionApi, SessionsApi {
         sessionRequestDto: Mono<SessionRequestDto>?,
         exchange: ServerWebExchange?
     ): Mono<ResponseEntity<SessionDataDto>> {
-        // TODO("Not yet implemented")
-        return Mono.empty()
+
+        return sessionRequestDto!!.flatMap{ sessionsService.postToken(SessionDataDto()
+            .paymentToken(it.paymentToken)
+            .sessionToken("")
+            .rptId(it.rptId)
+            .email(it.email)) }
+            .map { ResponseEntity.ok(SessionDataDto()) }
+
     }
 }
