@@ -6,16 +6,12 @@ import it.pagopa.sessionsservice.session.JwtTokenUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 
 
 @Service
@@ -28,7 +24,7 @@ class SessionsService {
 
     suspend fun validateSession(sessionData: SessionDataDto): Boolean {
         val data = getToken(sessionData.rptId)
-        return if (data.sessionToken.isNullOrEmpty()){
+        return if (data == null || data.sessionToken.isNullOrEmpty()) {
             logger.info("Session data validation failed. Session data not found in db.")
             false
         } else {
@@ -39,7 +35,7 @@ class SessionsService {
         }
     }
 
-    suspend fun getToken(rptId: String): SessionData {
+    suspend fun getToken(rptId: String): SessionData? {
         logger.info("Searching for session data with rptId (${rptId}.")
         return sessionOps.opsForValue().get(rptId).awaitSingle()
     }
@@ -49,11 +45,12 @@ class SessionsService {
         return sessionOps.scan().asFlow().map {
             return@map sessionOps.opsForValue().get(it).awaitSingle()
         }.map {
-            SessionDataDto()
-                .sessionToken(it.sessionToken)
-                .paymentToken(it.paymentToken)
-                .email(it.email)
-                .rptId(it.rptId)
+            SessionDataDto(
+                sessionToken = it.sessionToken!!,
+                paymentToken = it.paymentToken,
+                email = it.email,
+                rptId = it.rptId,
+            )
         }
     }
 
