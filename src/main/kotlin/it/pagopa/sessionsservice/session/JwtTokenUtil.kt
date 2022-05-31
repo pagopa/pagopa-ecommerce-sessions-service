@@ -20,7 +20,7 @@ class JwtTokenUtil{
     @Value("\${jwt.secret}")
     private val jwtSecret: String? = null
 
-    val logger = LoggerFactory.getLogger(javaClass)
+    val logger = LoggerFactory.getLogger(javaClass)!!
 
     private fun getKey(): SecretKey {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret))
@@ -28,8 +28,8 @@ class JwtTokenUtil{
 
     // Generate a signed JWT token (HMAC-SHA-256)
     fun generateToken(sessionDataDto: SessionDataDto): String? {
-        try {
-            return Jwts
+        return try {
+            Jwts
                 .builder()
                 .claim("rptId", sessionDataDto.rptId)
                 .claim("email", sessionDataDto.email)
@@ -39,21 +39,21 @@ class JwtTokenUtil{
                 .compact()
         } catch (jExc: JwtException){
             logger.error("Error during JWT token generation\n${jExc.message}")
-            return null
+            null
         }
     }
 
     // Validate signed token
     fun validateToken(token: String): Boolean {
-        try {
+        return try {
             val tokenBody = Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).body
-            return true
+            true
         } catch (signExc: SignatureException){
             logger.info("Error during JWS signature validation\n${signExc.message}")
-            return false
+            false
         } catch (exc: JwtException){
             logger.error("Unexpected error during token validation\n${exc.message}")
-            return false
+            false
         }
     }
 

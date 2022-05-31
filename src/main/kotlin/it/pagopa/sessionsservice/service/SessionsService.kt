@@ -54,13 +54,15 @@ class SessionsService {
         logger.info("Creating new session data for ${sessionDataDto.rptId}.")
 
         val sessionData = SessionData(
-            sessionDataDto.rptId, sessionDataDto.email, sessionDataDto.paymentToken, jwtTokenUtil?.generateToken(sessionDataDto)
+            sessionDataDto.rptId, sessionDataDto.email, sessionDataDto.paymentToken, jwtTokenUtil.generateToken(sessionDataDto)
         )
         return sessionOps.opsForValue().set(sessionDataDto.rptId, sessionData)
-            .map {
+            .mapNotNull {
                 if(it){
-                    return@map sessionData
-                } else return@map null
+                    return@mapNotNull sessionData
+                } else {
+                    return@mapNotNull null
+                }
             }
     }
 }
