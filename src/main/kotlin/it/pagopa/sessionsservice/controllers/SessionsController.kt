@@ -1,69 +1,82 @@
 package it.pagopa.sessionsservice.controllers
 
-import it.pagopa.sessionsservice.domain.RptId
-import it.pagopa.sessionsservice.domain.SessionData
-import it.pagopa.sessionsservice.domain.SessionRequest
-import it.pagopa.sessionsservice.domain.SessionResponse
-import it.pagopa.sessionsservice.repository.SessionRepository
-import it.pagopa.sessionsservice.session.JwtTokenUtil
-import org.slf4j.LoggerFactory
+import it.pagopa.generated.session.server.api.SessionApi
+import it.pagopa.generated.session.server.api.SessionsApi
+import it.pagopa.generated.session.server.model.SessionDataDto
+import it.pagopa.generated.session.server.model.SessionRequestDto
+import it.pagopa.sessionsservice.service.SessionsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.server.ServerWebExchange
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @RestController
-class SessionController(){
-  @Autowired val jwtTokenUtil: JwtTokenUtil? = null
-  @Autowired val sessionRepository: SessionRepository? = null
+class SessionsController: SessionApi, SessionsApi {
+    @Autowired lateinit var sessionsService: SessionsService
 
-  val logger = LoggerFactory.getLogger(javaClass)
+    override fun getToken(rptId: String?, exchange: ServerWebExchange?): Mono<ResponseEntity<SessionDataDto>> {
+        if (rptId.isNullOrEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
 
-  @PostMapping("/sessions")
-  fun postSession(@RequestBody sessionRequest: SessionRequest): ResponseEntity<SessionResponse>{
-    var sessionData: SessionData? =
-      sessionRequest.paymentToken?.let {
-        SessionData(RptId(sessionRequest.rptId), sessionRequest.email,
-          it, jwtTokenUtil?.generateToken(sessionRequest))
-      }
-    return if (sessionData != null){
-      sessionRepository?.save(sessionData)
-      ResponseEntity.ok(sessionData.toResponse())
-    } else {
-      ResponseEntity.badRequest().body(null)
+        return sessionsService.getToken(rptId).map { sessionData ->
+            return@map if(sessionData != null) {
+                ResponseEntity.ok(
+                    SessionDataDto()
+                        .rptId(sessionData.rptId)
+                        .paymentToken(sessionData.paymentToken)
+                        .sessionToken(sessionData.sessionToken)
+                        .email(sessionData.email)
+                )
+            } else {
+                throw ResponseStatusException(HttpStatus.NOT_FOUND)
+            }}
     }
-  }
 
-  @GetMapping("/session")
-  fun getSessions(@RequestParam(required = false) rptId: String?): ResponseEntity<Any> {
-    return ResponseEntity.ok(sessionRepository?.findAll()?.toList()?.map { sessionData -> sessionData.toResponse()  })
-  }
-
-  @GetMapping("/session/{rptId}")
-  fun getSession(@PathVariable rptId: String): ResponseEntity<Any>{
-    return try {
-      val rptIdObj = RptId(rptId)
-
-      val sessionData = sessionRepository?.findById(rptIdObj)?.get()?.toResponse()
-
-      return ResponseEntity.ok(sessionData)
-    } catch (nxElement: NoSuchElementException){
-      throw ResponseStatusException(
-        HttpStatus.NOT_FOUND, "Cannot found session data bound to this rptId"
-      )
+    override fun validateSession(
+        sessionDataDto: Mono<SessionDataDto>?,
+        exchange: ServerWebExchange?
+    ): Mono<ResponseEntity<Void>> {
+       return sessionDataDto?.flatMap { sessionData ->
+           return@flatMap sessionsService.validateSession(sessionData)
+               .map{ isValid ->
+                   if(!isValid){
+                       throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+                   } else {
+                       return@map ResponseEntity.ok().build()
+                   }
+               }
+       }
+           ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST)
     }
-  }
 
-  @PostMapping("/session/validate")
-  fun validateSession(@RequestBody sessionData: SessionData): ResponseEntity<String> {
-    val storedSessionData: SessionData = sessionRepository?.findById(sessionData.rptId)?.get()
-      ?: return ResponseEntity.badRequest().body("")
-
-    return if (storedSessionData.sessionToken == sessionData.sessionToken && sessionData.sessionToken?.let { jwtTokenUtil?.validateToken(it) } == true){
-      ResponseEntity.ok("")
-    } else {
-      ResponseEntity.badRequest().body("")
+    override fun getAllTokens(exchange: ServerWebExchange?): Mono<ResponseEntity<Flux<SessionDataDto>>> {
+       return Mono.just(ResponseEntity.ok(sessionsService.getAllTokens()))
     }
-  }
+
+    override fun postToken(
+        sessionRequestDto: Mono<SessionRequestDto>?,
+        exchange: ServerWebExchange?
+    ): Mono<ResponseEntity<SessionDataDto>> {
+
+        return sessionRequestDto!!.flatMap{ sessionsService.postToken(SessionDataDto()
+            .paymentToken(it.paymentToken)
+            .sessionToken("")
+            .rptId(it.rptId)
+            .email(it.email)) }
+            .map{
+                if(it != null){
+                    return@map ResponseEntity.ok(SessionDataDto()
+                        .paymentToken(it.paymentToken)
+                        .sessionToken(it.sessionToken)
+                        .rptId(it.rptId)
+                        .email(it.email))
+                } else {
+                    throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+                }
+            }
+
+    }
 }

@@ -1,4 +1,3 @@
-
 openapi: 3.0.1
 info:
   title: ecommerce pagoPA
@@ -40,9 +39,10 @@ paths:
                   $ref: '#/components/schemas/SessionData'
         '500':
           description: Internal Server Error
-
   /session/{rptId}:
     get:
+      summary: API retrieve the session token bound to an rptId
+      operationId: getToken
       parameters:
         - in: path
           name: rptId   # Note the name is the same as in the path
@@ -51,8 +51,6 @@ paths:
             type: string
             minimum: 1
           description: The rptId of the transaction
-      summary: API retrieve the session token bound to an rptId
-      operationId: getToken
       responses:
         '200':
           description: Success
@@ -60,6 +58,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionData'
+        '500':
+          description: Internal Server Error
+  /session/validate:
+    post:
+      summary: API to validate the session token
+      operationId: validateSession
+      requestBody:
+        description: Session Data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionData'
+      responses:
+        '200':
+          description: Success
+        '404':
+          description: Not valid
         '500':
           description: Internal Server Error
 

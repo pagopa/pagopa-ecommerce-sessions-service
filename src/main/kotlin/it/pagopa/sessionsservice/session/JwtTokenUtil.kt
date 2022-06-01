@@ -6,7 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
-import it.pagopa.sessionsservice.domain.SessionRequest
+import it.pagopa.generated.session.server.model.SessionDataDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -27,13 +27,13 @@ class JwtTokenUtil{
     }
 
     // Generate a signed JWT token (HMAC-SHA-256)
-    fun generateToken(sessionRequest: SessionRequest): String? {
+    fun generateToken(sessionDataDto: SessionDataDto): String? {
         try {
             return Jwts
                 .builder()
-                .claim("rptId", sessionRequest.rptId)
-                .claim("email", sessionRequest.email)
-                .claim("paymentToken", sessionRequest.paymentToken)
+                .claim("rptId", sessionDataDto.rptId)
+                .claim("email", sessionDataDto.email)
+                .claim("paymentToken", sessionDataDto.paymentToken)
                 .claim("jti", generateNonce())
                 .signWith(getKey(), SignatureAlgorithm.HS512)
                 .compact()
@@ -43,7 +43,7 @@ class JwtTokenUtil{
         }
     }
 
-    // Generate token
+    // Validate signed token
     fun validateToken(token: String): Boolean {
         try {
             val tokenBody = Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).body
