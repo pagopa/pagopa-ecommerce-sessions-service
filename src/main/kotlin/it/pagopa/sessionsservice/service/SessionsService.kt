@@ -5,8 +5,10 @@ import it.pagopa.sessionsservice.domain.SessionData
 import it.pagopa.sessionsservice.session.JwtTokenUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,20 +39,22 @@ class SessionsService {
 
     suspend fun getToken(rptId: String): SessionData? {
         logger.info("Searching for session data with rptId (${rptId}.")
-        return sessionOps.opsForValue().get(rptId).awaitSingle()
+        return sessionOps.opsForValue().get(rptId).awaitSingleOrNull()
     }
 
     fun getAllTokens(): Flow<SessionDataDto> {
         logger.info("Searching for all session data.")
         return sessionOps.scan().asFlow().map {
-            return@map sessionOps.opsForValue().get(it).awaitSingle()
-        }.map {
-            SessionDataDto(
-                sessionToken = it.sessionToken!!,
-                paymentToken = it.paymentToken,
-                email = it.email,
-                rptId = it.rptId,
-            )
+            return@map sessionOps.opsForValue().get(it).awaitSingleOrNull()
+        }.mapNotNull {
+            return@mapNotNull it?.let {
+                SessionDataDto(
+                    sessionToken = it.sessionToken!!,
+                    paymentToken = it.paymentToken,
+                    email = it.email,
+                    rptId = it.rptId,
+                )
+            }
         }
     }
 

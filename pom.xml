@@ -107,6 +107,13 @@
 			<artifactId>kotlinx-coroutines-reactor</artifactId>
 			<version>${kotlinx-coroutines.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlinx</groupId>
+			<artifactId>kotlinx-coroutines-test</artifactId>
+			<version>${kotlinx-coroutines.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
@@ -125,6 +132,7 @@
 				<configuration>
 					<args>
 						<arg>-Xjsr305=strict</arg>
+						<arg>-opt-in=kotlin.RequiresOptIn</arg>
 					</args>
 					<compilerPlugins>
 						<plugin>spring</plugin>
