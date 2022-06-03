@@ -115,6 +115,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>it.pagopa.sessionsservice.SessionsserviceApplication</mainClass>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
@@ -126,6 +129,9 @@
 					<compilerPlugins>
 						<plugin>spring</plugin>
 					</compilerPlugins>
+					<sourceDirs>
+						<sourceDir>${project.build.directory}/generated-sources/openapi/src/main/kotlin</sourceDir>
+					</sourceDirs>
 				</configuration>
 				<dependencies>
 					<dependency>
