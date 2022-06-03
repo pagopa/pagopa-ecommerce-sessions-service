@@ -22,8 +22,13 @@ WORKDIR /app/
 ARG EXTRACTED=/workspace/app/target/extracted
 
 COPY --from=build --chown=user ${EXTRACTED}/dependencies/ ./
+RUN true
 COPY --from=build --chown=user ${EXTRACTED}/spring-boot-loader/ ./
+RUN true
 COPY --from=build --chown=user ${EXTRACTED}/snapshot-dependencies/ ./
-COPY --from=build --chown=user ${EXTRACTED}/application/ ./
+RUN true
+COPY --from=build --chown=user ${EXTRACTED}/application/ ./ 
+RUN true
+
 
 ENTRYPOINT ["java","org.springframework.boot.loader.JarLauncher"]
