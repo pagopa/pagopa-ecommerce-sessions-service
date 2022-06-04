@@ -64,7 +64,8 @@ microservice-chart:
           targetValue: "30"
 
   envConfig:
-    SPRING_REDIS_HOST: pagopa-d-pagopa-proxy-redis.redis.cache.windows.net
+    REDIS_HOST: pagopa-d-pagopa-proxy-redis.redis.cache.windows.net
+    REDIS_PORT: "6380"
 
   envSecret:
     JWT_SECRET: sessions-jwt-secret
