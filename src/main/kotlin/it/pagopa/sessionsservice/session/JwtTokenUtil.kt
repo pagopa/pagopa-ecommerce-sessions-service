@@ -57,7 +57,7 @@ class JwtTokenUtil{
         }
     }
 
-    fun generateNonce(): String? {
+    fun generateNonce(): String {
         val secureRandom = SecureRandom()
         val stringBuilder = StringBuilder()
         for (i in 0..14) {
