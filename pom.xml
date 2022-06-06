@@ -113,7 +113,6 @@
 			<version>${kotlinx-coroutines.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
