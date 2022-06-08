@@ -3,12 +3,14 @@ package it.pagopa.sessionsservice.service
 import it.pagopa.generated.session.server.model.SessionDataDto
 import it.pagopa.sessionsservice.domain.SessionData
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -94,5 +96,18 @@ class SessionsServiceTest {
         /* test */
         // We're not interested in order, therefore we convert to Set before checking for equality
         assertEquals(service.getAllTokens().toSet(), expected.toSet())
+    }
+
+    @Test
+    fun `returns empty Flow when there is no session data`() = runTest {
+        val expected = emptySet<SessionData>()
+
+        /* preconditions */
+        given(sessionOps.scan()).willReturn(Flux.empty())
+        given(sessionOps.opsForValue()).willReturn(opsForValue)
+        given(opsForValue.get(any())).willReturn(Mono.empty())
+
+        /* test */
+        assertEquals(service.getAllTokens().toSet(), expected)
     }
 }
