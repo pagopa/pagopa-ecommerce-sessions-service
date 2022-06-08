@@ -16,7 +16,7 @@
 		<java.version>17</java.version>
 		<kotlin.version>1.6.21</kotlin.version>
 		<kotlinx-coroutines.version>1.6.2</kotlinx-coroutines.version>
-		<jacoco.version>0.8.7</jacoco.version>
+		<jacoco.version>0.8.8</jacoco.version>
 	</properties>
 	<dependencies>
 		<dependency>
