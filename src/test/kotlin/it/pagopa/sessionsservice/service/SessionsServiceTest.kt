@@ -117,6 +117,19 @@ class SessionsServiceTest {
     }
 
     @Test
+    fun `returns empty Flow when there is no session data returned`() = runTest {
+        val expected = emptySet<SessionData>()
+
+        /* preconditions */
+        given(sessionOps.scan()).willReturn(Flux.empty())
+        given(sessionOps.opsForValue()).willReturn(opsForValue)
+        given(opsForValue.get(any())).willReturn(Mono.never())
+
+        /* test */
+        assertEquals(service.getAllTokens().toSet(), expected)
+    }
+
+    @Test
     fun `return true for valid session token`() = runTest {
         val rptId = "77777777777302016723749670035"
         val sessionData =
