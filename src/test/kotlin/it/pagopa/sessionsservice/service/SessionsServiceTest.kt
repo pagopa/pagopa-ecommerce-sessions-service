@@ -195,4 +195,62 @@ class SessionsServiceTest {
         /* test */
         assertEquals(service.validateSession(sessionDataDto), false)
     }
+
+    @Test
+    fun `return new sessionToken for valid sessionDataDto`() = runTest {
+        val rptId = "77777777777302016723749670035"
+        val validSessionToken = "sessionToken"
+
+        val sessionData =
+                SessionData(
+                        sessionToken = validSessionToken,
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId,
+                )
+
+        val sessionDataDto =
+                SessionDataDto(
+                        sessionToken = "",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId
+                )
+        /* preconditions */
+        given(sessionOps.opsForValue()).willReturn(opsForValue)
+        given(jwtTokenUtil.generateToken(sessionDataDto)).willReturn(validSessionToken)
+        given(opsForValue.set(sessionData.rptId,sessionData)).willReturn(Mono.just(true))
+
+        /* test */
+        assertEquals(service.postToken(sessionDataDto), sessionData)
+    }
+
+    @Test
+    fun `return null if sessionToken save fails`() = runTest {
+        val rptId = "77777777777302016723749670035"
+        val validSessionToken = "sessionToken"
+
+        val sessionData =
+                SessionData(
+                        sessionToken = validSessionToken,
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId,
+                )
+
+        val sessionDataDto =
+                SessionDataDto(
+                        sessionToken = "",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId
+                )
+        /* preconditions */
+        given(sessionOps.opsForValue()).willReturn(opsForValue)
+        given(jwtTokenUtil.generateToken(sessionDataDto)).willReturn(validSessionToken)
+        given(opsForValue.set(sessionData.rptId,sessionData)).willReturn(Mono.just(false))
+
+        /* test */
+        assertEquals(service.postToken(sessionDataDto), null)
+    }
 }
