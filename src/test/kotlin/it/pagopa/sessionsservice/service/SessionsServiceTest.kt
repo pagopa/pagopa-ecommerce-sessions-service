@@ -2,8 +2,8 @@ package it.pagopa.sessionsservice.service
 
 import it.pagopa.generated.session.server.model.SessionDataDto
 import it.pagopa.sessionsservice.domain.SessionData
+import it.pagopa.sessionsservice.session.JwtTokenUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,12 +14,14 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.data.redis.core.ReactiveValueOperations
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import org.springframework.context.annotation.Import
 
 @ExtendWith(SpringExtension::class)
 @TestPropertySource(locations = ["classpath:application.test.properties"])
@@ -33,6 +35,9 @@ class SessionsServiceTest {
 
     @InjectMocks
     lateinit var service: SessionsService
+
+    @Mock
+    lateinit var jwtTokenUtil: JwtTokenUtil
 
     @Test
     fun `returns null on non-existing rptId query`() = runTest {
@@ -109,5 +114,85 @@ class SessionsServiceTest {
 
         /* test */
         assertEquals(service.getAllTokens().toSet(), expected)
+    }
+
+    @Test
+    fun `return true for valid session token`() = runTest {
+        val rptId = "77777777777302016723749670035"
+        val sessionData =
+                SessionData(
+                        sessionToken = "sessionToken",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId,
+                )
+
+        val sessionDataDto =
+                SessionDataDto(
+                        sessionToken = "sessionToken",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId
+                )
+        /* preconditions */
+        given(sessionOps.opsForValue()).willReturn(opsForValue)
+        given(opsForValue.get(rptId)).willReturn(Mono.just(sessionData))
+        given(jwtTokenUtil.validateToken(sessionDataDto.sessionToken)).willReturn(true)
+
+        /* test */
+        assertEquals(service.validateSession(sessionDataDto), true)
+    }
+
+    @Test
+    fun `return false for empty session token`() = runTest {
+        val rptId = "77777777777302016723749670035"
+        val sessionData =
+                SessionData(
+                        sessionToken = "sessionToken",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId,
+                )
+
+        val sessionDataDto =
+                SessionDataDto(
+                        sessionToken = "",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId
+                )
+        /* preconditions */
+        given(sessionOps.opsForValue()).willReturn(opsForValue)
+        given(opsForValue.get(rptId)).willReturn(Mono.just(sessionData))
+
+        /* test */
+        assertEquals(service.validateSession(sessionDataDto), false)
+    }
+
+    @Test
+    fun `return false for invalid session token`() = runTest {
+        val rptId = "77777777777302016723749670035"
+        val sessionData =
+                SessionData(
+                        sessionToken = "sessionToken",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId,
+                )
+
+        val sessionDataDto =
+                SessionDataDto(
+                        sessionToken = "InvalidSessionToken",
+                        paymentToken = "paymentToken",
+                        email = "john@example.com",
+                        rptId = rptId
+                )
+        /* preconditions */
+        given(sessionOps.opsForValue()).willReturn(opsForValue)
+        given(opsForValue.get(rptId)).willReturn(Mono.just(sessionData))
+        given(jwtTokenUtil.validateToken(sessionDataDto.sessionToken)).willReturn(false)
+
+        /* test */
+        assertEquals(service.validateSession(sessionDataDto), false)
     }
 }
