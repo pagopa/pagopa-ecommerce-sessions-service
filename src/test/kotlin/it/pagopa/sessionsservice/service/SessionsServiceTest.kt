@@ -5,6 +5,7 @@ import it.pagopa.sessionsservice.domain.SessionData
 import it.pagopa.sessionsservice.session.JwtTokenUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toSet
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -14,14 +15,13 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.BDDMockito.given
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.mockito.Mockito
 import org.springframework.data.redis.core.ReactiveRedisOperations
 import org.springframework.data.redis.core.ReactiveValueOperations
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import org.springframework.context.annotation.Import
 
 @ExtendWith(SpringExtension::class)
 @TestPropertySource(locations = ["classpath:application.test.properties"])
@@ -43,12 +43,17 @@ class SessionsServiceTest {
     fun `returns null on non-existing rptId query`() = runTest {
         val rptId = "77777777777302016723749670035"
 
-        /* preconditions */
-        given(sessionOps.opsForValue()).willReturn(opsForValue)
-        given(opsForValue.get(rptId)).willReturn(Mono.empty())
+        val monoExtensions = Mockito.mockStatic(Class.forName("kotlinx.coroutines.reactor.MonoKt"))
 
-        /* test */
-        assertNull(service.getToken(rptId))
+        monoExtensions.use {
+            /* preconditions */
+            given(sessionOps.opsForValue()).willReturn(opsForValue)
+            given(opsForValue.get(rptId)).willReturn(Mono.empty())
+            given(Mono.empty<SessionData>().awaitSingleOrNull()).willReturn(null)
+
+            /* test */
+            assertNull(service.getToken(rptId))
+        }
     }
 
     @Test
