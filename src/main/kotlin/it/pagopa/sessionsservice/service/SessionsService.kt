@@ -17,11 +17,10 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class SessionsService {
-    @Autowired
-    private lateinit var sessionOps: ReactiveRedisOperations<String, SessionData>
-    @Autowired
-    private lateinit var jwtTokenUtil: JwtTokenUtil
+class SessionsService(
+    @Autowired private val sessionOps: ReactiveRedisOperations<String, SessionData>,
+    @Autowired private val jwtTokenUtil: JwtTokenUtil
+) {
     var logger: Logger = LoggerFactory.getLogger(SessionsService::class.java)
 
     suspend fun validateSession(sessionData: SessionDataDto): Boolean {

@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-class SessionsController: SessionApi, SessionsApi {
-    @Autowired lateinit var sessionsService: SessionsService
+class SessionsController(
+    @Autowired private val sessionsService: SessionsService
+): SessionApi, SessionsApi {
 
     override suspend fun getToken(rptId: String): ResponseEntity<SessionDataDto> {
         if (rptId.isEmpty()) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
