@@ -16,7 +16,7 @@
 		<java.version>17</java.version>
 		<kotlin.version>1.6.21</kotlin.version>
 		<kotlinx-coroutines.version>1.6.2</kotlinx-coroutines.version>
-		<jacoco.version>0.8.7</jacoco.version>
+		<jacoco.version>0.8.8</jacoco.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -111,6 +111,12 @@
 			<artifactId>kotlinx-coroutines-reactor</artifactId>
 			<version>${kotlinx-coroutines.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlinx</groupId>
+			<artifactId>kotlinx-coroutines-test</artifactId>
+			<version>${kotlinx-coroutines.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
@@ -129,12 +135,14 @@
 				<configuration>
 					<args>
 						<arg>-Xjsr305=strict</arg>
+						<arg>-opt-in=kotlin.RequiresOptIn</arg>
 					</args>
 					<compilerPlugins>
 						<plugin>spring</plugin>
 					</compilerPlugins>
 					<sourceDirs>
 						<sourceDir>${project.build.directory}/generated-sources/openapi/src/main/kotlin</sourceDir>
+						<sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
 					</sourceDirs>
 				</configuration>
 				<dependencies>
@@ -144,6 +152,21 @@
 						<version>${kotlin.version}</version>
 					</dependency>
 				</dependencies>
+				<executions>
+					<execution>
+						<id>test-compile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>test-compile</goal>
+						</goals>
+						<configuration>
+							<sourceDirs>
+								<sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+								<sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
+							</sourceDirs>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.openapitools</groupId>
@@ -181,6 +204,11 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
+				<configuration>
+                    <excludes>
+                        <exclude>it/pagopa/generated/**</exclude>
+                    </excludes>
+                </configuration>
 				<executions>
 					<execution>
 						<id>jacoco-initialize</id>
