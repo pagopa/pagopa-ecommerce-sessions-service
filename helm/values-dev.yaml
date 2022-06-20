@@ -3,22 +3,41 @@ microservice-chart:
   nameOverride: ""
   fullnameOverride: ""
 
-  deployment:
-    create: true
-    livenessProbePath: /actuator/health/liveness
-    readinessProbePath: /actuator/health/readiness
+
     
   image:
     repository: pagopadcommonacr.azurecr.io/pagopaecommercesessionsservice
     tag: "latest" #improve
     pullPolicy: Always
+
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: 8080
+    initialDelaySeconds: 60
+    failureThreshold: 6
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: 8080
+    initialDelaySeconds: 60
+    failureThreshold: 6
+    periodSeconds: 10
+  
+  deployment:
+    create: true
+
+  service:
+    create: true
+    type: ClusterIP
     port: 8080
 
-
   ingress:
+    create: true
     host: "weudev.ecommerce.internal.dev.platform.pagopa.it"
-    path: "/ecommerce"
-    pathType: "ImplementationSpecific"
+    path: /pagopa-ecommerce-sessions-service/(.*)
   
   serviceAccount:
     create: false
@@ -33,10 +52,6 @@ microservice-chart:
 
   securityContext:
     allowPrivilegeEscalation: false
-
-  service:
-    type: ClusterIP
-    port: 80
 
   resources:
     requests:
